@@ -2,7 +2,8 @@
 title: Likelihood & Model Fit
 theme: "deep-space"
 ---
-
+ 
+# Exploring the relationship between likelihood and model fit
 
 ```js
 import {html} from "npm:htl";
@@ -10,25 +11,41 @@ const file = FileAttachment("data/likelihood.json").json();
 ```
 
 
+
 ```js
 // parsample = Math.floor(Math.random()*10);
 const parsample = view(Inputs.button("Sample Dataset", {value: 1, reduce: () => 1+Math.floor(Math.random()*10)}));
 const table = aq.from(file.likelihood);
 const datatable = aq.from(file.data);
-const a = view(Inputs.range([0, 10], {step: 0.5, label:'Intercept (α)'}));
-const b = view(Inputs.range([0, 1], {step: .05, label: "Slope (β)"}));
+
 ```
+<div class="grid grid-cols-2", style="grid-auto-rows: auto; max-width:800px;">
+
+
+<div class="card grid-colspan-2">
+
+<h2> Some example data </h2>
+<h3> Try moving the sliders for the slope (β) and intercept (α) to optimize the fit to the data. </h3>
 
 
 
 ```js
+const i = Inputs.input(1)
+```
+
+```js
+const zz = Inputs.range([0, 10], {step: 0.5, label:'Intercept (α)'})
+const yy = Inputs.range([0, 1], {step: .05, label: "Slope (β)"})
+const a = view(zz);
+const b = view(yy);
+
 const tv = table.filter(aq.escape(d => (Math.abs(d.b-b) < 0.00001) && (Math.abs(d.a - a) <  0.0001)));
 ```
 
 
-
 ```js
 const minmax = table.rollup({minll: aq.op.min("ll"), maxll: aq.op.max("ll")}).objects()[0];
+
 ```
 
 ```js
@@ -50,7 +67,11 @@ const avals  = dp.groupby('a','b').rollup({ll: aq.op.sum("ll")}).filter(aq.escap
 
 ```
 
-<div class="grid grid-cols-2">
+
+
+
+
+
 
 ```js
 Plot.plot({
@@ -67,10 +88,28 @@ Plot.plot({
       y2: (k) => a + (b*10),
       strokeOpacity: (k) => k === 1 ? 1 : 0.2
     }),
-        Plot.dot(dp2, {x:"x", y:"y", stroke: (k) => Math.exp(-k.ll), r: (k) => Math.exp(-k.ll), strokeOpacity:1})
-  ] 
+      Plot.dot(dp2, {x:"x", y:"y", stroke: (k) => Math.exp(-k.ll), r: (k) => Math.exp(-k.ll), strokeOpacity:1})
+  ],
+
+  width: 600
 })
+
 ```
+<p> In this example, the size and color of the dots indicates the probability density of each example data point. Try different values and see what happens to the relative likelihood of each point. </p>
+</div>
+
+
+
+
+
+
+
+</div>
+
+## Likelihood in two dimensions
+<div class="grid grid-cols-2", style="grid-auto-rows: auto; max-width:800px;">
+
+<div class="card grid-colspan-2">
 
 ```js
 Plot.plot({
@@ -82,11 +121,12 @@ Plot.plot({
   ]
 })
 ```
-
 </div>
 
-<div class="grid grid-cols-2">
 
+<div class="card grid-colspan-1">
+
+<h2> Slope </h2>
 
 ```js
 Plot.plot({
@@ -98,6 +138,14 @@ Plot.plot({
 ```
 
 ```js
+const bb = view(Inputs.bind(Inputs.range([0, 1], {step: .05, label: "Slope (β)"}),yy))
+```
+</div>
+
+<div class="card grid-colspan-1">
+<h2> Intercept </h2>
+
+```js
 Plot.plot({
  // y: {domain: [-4000, 0]},
   marks: [
@@ -106,5 +154,16 @@ Plot.plot({
   ]
     })
 ```
+```js
+    const aa = view(Inputs.bind(Inputs.range([0, 10], {step: 0.5, label:'α'}),zz));
+```
 
 </div>
+
+
+</div>
+
+```js
+
+
+```

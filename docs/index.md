@@ -1,110 +1,110 @@
 ---
-toc: false
+title: Likelihood & Model Fit
+theme: "deep-space"
 ---
 
-<style>
 
-.hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-family: var(--sans-serif);
-  margin: 4rem 0 8rem;
-  text-wrap: balance;
-  text-align: center;
-}
+```js
+import {html} from "npm:htl";
+const file = FileAttachment("data/likelihood.json").json();
+```
 
-.hero h1 {
-  margin: 2rem 0;
-  max-width: none;
-  font-size: 14vw;
-  font-weight: 900;
-  line-height: 1;
-  background: linear-gradient(30deg, var(--theme-foreground-focus), currentColor);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
 
-.hero h2 {
-  margin: 0;
-  max-width: 34em;
-  font-size: 20px;
-  font-style: initial;
-  font-weight: 500;
-  line-height: 1.5;
-  color: var(--theme-foreground-muted);
-}
+```js
+// parsample = Math.floor(Math.random()*10);
+const parsample = view(Inputs.button("Sample Dataset", {value: 1, reduce: () => 1+Math.floor(Math.random()*10)}));
+const table = aq.from(file.likelihood);
+const datatable = aq.from(file.data);
+const a = view(Inputs.range([0, 10], {step: 0.5, label:'Intercept (α)'}));
+const b = view(Inputs.range([0, 1], {step: .05, label: "Slope (β)"}));
+```
 
-@media (min-width: 640px) {
-  .hero h1 {
-    font-size: 90px;
-  }
-}
 
-</style>
 
-<div class="hero">
-  <h1>Hello, Observable Framework</h1>
-  <h2>Welcome to your new project! Edit&nbsp;<code style="font-size: 90%;">docs/index.md</code> to change this page.</h2>
-  <a href="https://observablehq.com/framework/getting-started" target="_blank">Get started<span style="display: inline-block; margin-left: 0.25rem;">↗︎</span></a>
+```js
+const tv = table.filter(aq.escape(d => (Math.abs(d.b-b) < 0.00001) && (Math.abs(d.a - a) <  0.0001)));
+```
+
+
+
+```js
+const minmax = table.rollup({minll: aq.op.min("ll"), maxll: aq.op.max("ll")}).objects()[0];
+```
+
+```js
+const dp = datatable.filter(aq.escape(d => d.parset == parsample));
+const dp2 = dp.filter(aq.escape(d => (Math.abs(d.b-b) < 0.00001) && (Math.abs(d.a - a) <  0.0001)))
+```
+
+```js
+const llvals = dp.rollup({minll: aq.op.min("ll"), maxll: aq.op.max("ll")}).objects()[0]
+```
+
+```js
+
+const allvals  = dp.groupby('a','b').rollup({ll: aq.op.sum("ll")})
+
+const bvals  = dp.groupby('a','b').rollup({ll: aq.op.sum("ll")}).filter(aq.escape(d => Math.abs(a-d.a) < 0.0001 )).objects();
+
+const avals  = dp.groupby('a','b').rollup({ll: aq.op.sum("ll")}).filter(aq.escape(d => Math.abs(b-d.b) < 0.0001 )).objects();
+
+```
+
+<div class="grid grid-cols-2">
+
+```js
+Plot.plot({
+ x: {domain:[0,9]},
+ y: {domain:[0,9]},
+  color: {label: "Density", legend: true, scheme:"turbo", type:"symlog"},
+  marks: [
+
+  // Plot.raster(tv.array("ll"), {x1: 0, x2: 10, y1: 0, y2: 10, width: 41, height: 41}),
+    Plot.link([1], {
+      x1: 0,
+      y1: a,
+      x2: 10,
+      y2: (k) => a + (b*10),
+      strokeOpacity: (k) => k === 1 ? 1 : 0.2
+    }),
+        Plot.dot(dp2, {x:"x", y:"y", stroke: (k) => Math.exp(-k.ll), r: (k) => Math.exp(-k.ll), strokeOpacity:1})
+  ] 
+})
+```
+
+```js
+Plot.plot({
+  color: {label: "Negative Log-Likelihood", type: "symlog",  legend: true},
+  marks: [
+  Plot.raster(allvals.array("ll"), {y1: 0, y2:10, x1:0, x2:1, width: 21, height:21}),
+  Plot.ruleX([b]),
+  Plot.ruleY([a])
+  ]
+})
+```
+
 </div>
 
-<div class="grid grid-cols-2" style="grid-auto-rows: 504px;">
-  <div class="card">${
-    resize((width) => Plot.plot({
-      title: "Your awesomeness over time 🚀",
-      subtitle: "Up and to the right!",
-      width,
-      y: {grid: true, label: "Awesomeness"},
-      marks: [
-        Plot.ruleY([0]),
-        Plot.lineY(aapl, {x: "Date", y: "Close", tip: true})
-      ]
-    }))
-  }</div>
-  <div class="card">${
-    resize((width) => Plot.plot({
-      title: "How big are penguins, anyway? 🐧",
-      width,
-      grid: true,
-      x: {label: "Body mass (g)"},
-      y: {label: "Flipper length (mm)"},
-      color: {legend: true},
-      marks: [
-        Plot.linearRegressionY(penguins, {x: "body_mass_g", y: "flipper_length_mm", stroke: "species"}),
-        Plot.dot(penguins, {x: "body_mass_g", y: "flipper_length_mm", stroke: "species", tip: true})
-      ]
-    }))
-  }</div>
-</div>
+<div class="grid grid-cols-2">
 
----
 
-## Next steps
+```js
+Plot.plot({
+  marks: [
+    Plot.line(bvals, {x:"b", y:"ll"}),
+    Plot.ruleX([b])
+  ]
+    })
+```
 
-Here are some ideas of things you could try…
+```js
+Plot.plot({
+ // y: {domain: [-4000, 0]},
+  marks: [
+    Plot.line(avals, {x:"a", y:"ll"}),
+    Plot.ruleX([a])
+  ]
+    })
+```
 
-<div class="grid grid-cols-4">
-  <div class="card">
-    Chart your own data using <a href="https://observablehq.com/framework/lib/plot"><code>Plot</code></a> and <a href="https://observablehq.com/framework/javascript/files"><code>FileAttachment</code></a>. Make it responsive using <a href="https://observablehq.com/framework/javascript/display#responsive-display"><code>resize</code></a>.
-  </div>
-  <div class="card">
-    Create a <a href="https://observablehq.com/framework/routing">new page</a> by adding a Markdown file (<code>whatever.md</code>) to the <code>docs</code> folder.
-  </div>
-  <div class="card">
-    Add a drop-down menu using <a href="https://observablehq.com/framework/javascript/inputs"><code>Inputs.select</code></a> and use it to filter the data shown in a chart.
-  </div>
-  <div class="card">
-    Write a <a href="https://observablehq.com/framework/loaders">data loader</a> that queries a local database or API, generating a data snapshot on build.
-  </div>
-  <div class="card">
-    Import a <a href="https://observablehq.com/framework/javascript/imports">recommended library</a> from npm, such as <a href="https://observablehq.com/framework/lib/leaflet">Leaflet</a>, <a href="https://observablehq.com/framework/lib/dot">GraphViz</a>, <a href="https://observablehq.com/framework/lib/tex">TeX</a>, or <a href="https://observablehq.com/framework/lib/duckdb">DuckDB</a>.
-  </div>
-  <div class="card">
-    Ask for help, or share your work or ideas, on the <a href="https://talk.observablehq.com/">Observable forum</a>.
-  </div>
-  <div class="card">
-    Visit <a href="https://github.com/observablehq/framework">Framework on GitHub</a> and give us a star. Or file an issue if you’ve found a bug!
-  </div>
 </div>

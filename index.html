@@ -35,23 +35,33 @@ const file = FileAttachment("data/likelihood.json").json();
 return {html,file};
 }});
 
-define({id: "618b2d82", inputs: ["view","Inputs","aq","file"], outputs: ["parsample","table","datatable","a","b"], body: (view,Inputs,aq,file) => {
+define({id: "2e7e113e", inputs: ["view","Inputs","aq","file"], outputs: ["parsample","table","datatable"], body: (view,Inputs,aq,file) => {
 // parsample = Math.floor(Math.random()*10);
 const parsample = view(Inputs.button("Sample Dataset", {value: 1, reduce: () => 1+Math.floor(Math.random()*10)}));
 const table = aq.from(file.likelihood);
 const datatable = aq.from(file.data);
-const a = view(Inputs.range([0, 10], {step: 0.5, label:'Intercept (α)'}));
-const b = view(Inputs.range([0, 1], {step: .05, label: "Slope (β)"}));
-return {parsample,table,datatable,a,b};
+
+return {parsample,table,datatable};
 }});
 
-define({id: "58fb4bd1", inputs: ["table","aq","b","a"], outputs: ["tv"], body: (table,aq,b,a) => {
+define({id: "d522e0b4", inputs: ["Inputs"], outputs: ["i"], body: (Inputs) => {
+const i = Inputs.input(1)
+return {i};
+}});
+
+define({id: "9a274df9", inputs: ["Inputs","view","table","aq"], outputs: ["zz","yy","a","b","tv"], body: (Inputs,view,table,aq) => {
+const zz = Inputs.range([0, 10], {step: 0.5, label:'Intercept (α)'})
+const yy = Inputs.range([0, 1], {step: .05, label: "Slope (β)"})
+const a = view(zz);
+const b = view(yy);
+
 const tv = table.filter(aq.escape(d => (Math.abs(d.b-b) < 0.00001) && (Math.abs(d.a - a) <  0.0001)));
-return {tv};
+return {zz,yy,a,b,tv};
 }});
 
-define({id: "d4103d18", inputs: ["table","aq"], outputs: ["minmax"], body: (table,aq) => {
+define({id: "6e16ea1f", inputs: ["table","aq"], outputs: ["minmax"], body: (table,aq) => {
 const minmax = table.rollup({minll: aq.op.min("ll"), maxll: aq.op.max("ll")}).objects()[0];
+
 return {minmax};
 }});
 
@@ -76,7 +86,7 @@ const avals  = dp.groupby('a','b').rollup({ll: aq.op.sum("ll")}).filter(aq.escap
 return {allvals,bvals,avals};
 }});
 
-define({id: "59cac8c8", inputs: ["Plot","a","b","dp2","display"], body: async (Plot,a,b,dp2,display) => {
+define({id: "4f06073e", inputs: ["Plot","a","b","dp2","display"], body: async (Plot,a,b,dp2,display) => {
 display(await(
 Plot.plot({
  x: {domain:[0,9]},
@@ -92,9 +102,12 @@ Plot.plot({
       y2: (k) => a + (b*10),
       strokeOpacity: (k) => k === 1 ? 1 : 0.2
     }),
-        Plot.dot(dp2, {x:"x", y:"y", stroke: (k) => Math.exp(-k.ll), r: (k) => Math.exp(-k.ll), strokeOpacity:1})
-  ] 
+      Plot.dot(dp2, {x:"x", y:"y", stroke: (k) => Math.exp(-k.ll), r: (k) => Math.exp(-k.ll), strokeOpacity:1})
+  ],
+
+  width: 600
 })
+
 ))
 }});
 
@@ -122,6 +135,11 @@ Plot.plot({
 ))
 }});
 
+define({id: "34e76d59", inputs: ["view","Inputs","yy"], outputs: ["bb"], body: (view,Inputs,yy) => {
+const bb = view(Inputs.bind(Inputs.range([0, 1], {step: .05, label: "Slope (β)"}),yy))
+return {bb};
+}});
+
 define({id: "5edd5c14", inputs: ["Plot","avals","a","display"], body: async (Plot,avals,a,display) => {
 display(await(
 Plot.plot({
@@ -134,29 +152,62 @@ Plot.plot({
 ))
 }});
 
+define({id: "821568a6", inputs: ["view","Inputs","zz"], outputs: ["aa"], body: (view,Inputs,zz) => {
+    const aa = view(Inputs.bind(Inputs.range([0, 10], {step: 0.5, label:'α'}),zz));
+return {aa};
+}});
+
+define({id: "75a11da4", body: () => {
+
+}});
+
 </script>
 <aside id="observablehq-toc" data-selector="h1:not(:first-of-type), h2:first-child, :not(h1) + h2">
 <nav>
+<div>Contents</div>
+<ol>
+<li class="observablehq-secondary-link"><a href="#likelihood-in-two-dimensions">Likelihood in two dimensions</a></li>
+</ol>
 </nav>
 </aside>
 <div id="observablehq-center">
 <main id="observablehq-main" class="observablehq">
+<h1 id="exploring-the-relationship-between-likelihood-and-model-fit" tabindex="-1"><a class="observablehq-header-anchor" href="#exploring-the-relationship-between-likelihood-and-model-fit">Exploring the relationship between likelihood and model fit</a></h1>
 <div id="cell-5a710d61" class="observablehq observablehq--block"></div>
-<div id="cell-618b2d82" class="observablehq observablehq--block"></div>
-<div id="cell-58fb4bd1" class="observablehq observablehq--block"></div>
-<div id="cell-d4103d18" class="observablehq observablehq--block"></div>
+<div id="cell-2e7e113e" class="observablehq observablehq--block"></div>
+<div class="grid grid-cols-2" ,="" style="grid-auto-rows: auto; max-width:800px;">
+<div class="card grid-colspan-2">
+<h2> Some example data </h2>
+<h3> Try moving the sliders for the slope (β) and intercept (α) to optimize the fit to the data. </h3>
+<div id="cell-d522e0b4" class="observablehq observablehq--block"></div>
+<div id="cell-9a274df9" class="observablehq observablehq--block"></div>
+<div id="cell-6e16ea1f" class="observablehq observablehq--block"></div>
 <div id="cell-f574b62f" class="observablehq observablehq--block"></div>
 <div id="cell-92fa335b" class="observablehq observablehq--block"></div>
 <div id="cell-f2b8c9f9" class="observablehq observablehq--block"></div>
-<div class="grid grid-cols-2">
-<div id="cell-59cac8c8" class="observablehq observablehq--block observablehq--loading"></div>
+<div id="cell-4f06073e" class="observablehq observablehq--block observablehq--loading"></div>
+<p> In this example, the size and color of the dots indicates the probability density of each example data point. Try different values and see what happens to the relative likelihood of each point. </p>
+</div>
+</div>
+<h2 id="likelihood-in-two-dimensions" tabindex="-1"><a class="observablehq-header-anchor" href="#likelihood-in-two-dimensions">Likelihood in two dimensions</a></h2>
+<div class="grid grid-cols-2" ,="" style="grid-auto-rows: auto; max-width:800px;">
+<div class="card grid-colspan-2">
 <div id="cell-b90c7f3e" class="observablehq observablehq--block observablehq--loading"></div>
 </div>
-<div class="grid grid-cols-2">
+<div class="card grid-colspan-1">
+<h2> Slope </h2>
 <div id="cell-e9760447" class="observablehq observablehq--block observablehq--loading"></div>
+<div id="cell-34e76d59" class="observablehq observablehq--block"></div>
+</div>
+<div class="card grid-colspan-1">
+<h2> Intercept </h2>
 <div id="cell-5edd5c14" class="observablehq observablehq--block observablehq--loading"></div>
-</div></main>
+<div id="cell-821568a6" class="observablehq observablehq--block"></div>
+</div>
+</div>
+<div id="cell-75a11da4" class="observablehq observablehq--block"></div>
+</main>
 <footer id="observablehq-footer">
-<div>Built with <a href="https://observablehq.com/" target="_blank">Observable</a> on <a title="2024-03-07T09:14:52">Mar 7, 2024</a>.</div>
+<div>Built with <a href="https://observablehq.com/" target="_blank">Observable</a> on <a title="2024-03-07T17:23:17">Mar 7, 2024</a>.</div>
 </footer>
 </div>

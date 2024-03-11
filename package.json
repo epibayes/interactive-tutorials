@@ -4,14 +4,20 @@
   "scripts": {
     "clean": "rimraf docs/.observablehq/cache",
     "build": "rimraf dist && observable build",
-    "dev": "observable preview",
+    "dev": "concurrently --kill-others \"observable preview\" \"./citewatch.sh\"",
     "deploy": "observable deploy",
     "observable": "observable"
   },
   "dependencies": {
+    "@arothuis/markdown-it-biblatex": "^1.0.1",
+    "@citation-js/core": "^0.7.9",
     "@observablehq/framework": "latest",
+    "chokidar-cli": "^3.0.0",
+    "concurrently": "^8.2.2",
     "d3-dsv": "^3.0.1",
-    "d3-time-format": "^4.1.0"
+    "d3-time-format": "^4.1.0",
+    "markdown-it-bibliography": "^0.1.0",
+    "markdown-it-footnote": "^4.0.0"
   },
   "devDependencies": {
     "rimraf": "^5.0.5"

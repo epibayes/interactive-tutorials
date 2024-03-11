@@ -98,12 +98,6 @@ Plot.plot({
 <p> In this example, the size and color of the dots indicates the probability density of each example data point. Try different values and see what happens to the relative likelihood of each point. </p>
 </div>
 
-
-
-
-
-
-
 </div>
 
 ## Likelihood in two dimensions

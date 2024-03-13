@@ -20,7 +20,8 @@
     "markdown-it-footnote": "^4.0.0"
   },
   "devDependencies": {
-    "rimraf": "^5.0.5"
+    "rimraf": "^5.0.5",
+    "chokidar-cli": "^3.0.0"
   },
   "engines": {
     "node": ">=18"

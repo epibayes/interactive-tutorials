@@ -47,7 +47,8 @@ Miller [@miller2004] specifically draws on systems theory to argue that the very
 4. Griffith [@griffith2023a] makes the point that positive and negative spatial autocorrelation commonly co-occur, so that it is important to not over-focus on one vs. the other. 
 
 5. Also points out that the nature of autocorrelation will be a function of scale. Provides the Snow Cholera data as an example: At small scales, there will be a combination of positive (PSA) and negative spatial autocorrelation (NSA), while at higher levels (e.g. all of london) the prevailing pattern will be PSA due to the relatively small size of the area of the outbreak. 
-- 
+
+
 ### Temporal
 
 ### Social

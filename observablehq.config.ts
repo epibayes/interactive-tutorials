@@ -12,8 +12,9 @@ export default {
     {
       name: "Examples",
       pages: [
-        { name: "Likelihood", path: "/index" },
-        {name: "Relationships", path: "/relationships2"}
+        { name: "Introduction", path: "/index" },
+        { name: "Relationships", path: "/relationships" },
+        {name: "Likelihood", path: "/likelihood"}
       ]
     }
   ],

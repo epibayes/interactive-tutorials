@@ -1,4 +1,5 @@
 #! /usr/local/bin/Rscript
+library(jsonlite)
 
 read_metadata <- function(file) {
     x <- readr::read_lines(file)
